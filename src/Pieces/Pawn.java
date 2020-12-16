@@ -26,6 +26,6 @@ public class Pawn extends Piece {
 
     @Override
     public ArrayList<String> allowedMoves(String oldReadablePosition) {
-        return PiecePos.allowedMoves(oldReadablePosition, this);
+        return PiecePos.allowedMoves(this);
     }
 }

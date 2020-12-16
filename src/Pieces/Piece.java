@@ -16,8 +16,8 @@ public abstract class Piece {
     protected String position;
     protected Square square;
     protected boolean firstMove;
-    int rank;
     int file;
+    int rank;
 
 
     public Piece(String pos){

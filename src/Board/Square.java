@@ -20,7 +20,7 @@ public class Square {
 
     public String getReadableLocation(int rank, int file){
         String alpha=String.valueOf(PiecePos.tebahpla[file]);
-        String rankString=String.valueOf(rank+1);
+        String rankString=String.valueOf(rank);
         setReadablePos(alpha+rankString);
         return alpha+rankString;
     }

@@ -9,7 +9,12 @@ public interface GetSquareFromRankFile {
     static final Hashtable<String, Square> squarePos = new Hashtable<>();
 
     static Square getSquarePos(String pos) {
-        return squarePos.get(pos);
+        try{
+            return squarePos.get(pos);
+        } catch(NullPointerException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     static void setSquarePos(String filePlusRank, Square square){

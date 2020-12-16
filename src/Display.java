@@ -130,9 +130,11 @@ public interface Display {
                         " | " + ANSI_RED + square.getPiece().getPosition() +ANSI_RESET
                 );
             } else {
-                System.out.print(
-                        " | " + ANSI_YELLOW + square.getPiece().getPosition() + ANSI_RESET
-                );
+                if(square.getPiece() != null){
+                    System.out.print(
+                            " | " + ANSI_YELLOW + square.getPiece().getPosition() + ANSI_RESET
+                    );
+                }
             }
             if(i%8 == 0){
                 System.out.print(

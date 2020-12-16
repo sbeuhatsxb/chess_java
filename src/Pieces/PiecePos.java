@@ -6,11 +6,10 @@ import Board.Square;
 import java.util.*;
 
 public interface PiecePos {
-    static final char[] tebahpla = "hgfedcba".toCharArray();
-    static final char[] alphabet = "abcdefgh".toCharArray();
+    //Pushing one caracter in the begining since index begins with 1;
+    static final char[] alphabet = "$abcdefgh".toCharArray();
+    static final char[] tebahpla = "$hgfedcba".toCharArray();
     static final Hashtable<String, Piece> piecePos = new Hashtable<>();
-    //DEPRECATED
-    static final Map<String, Integer> convertMap = new HashMap<>();
 
     public static Piece getPieceFromPos(String pos) {
         return piecePos.get(pos);
@@ -20,37 +19,12 @@ public interface PiecePos {
         piecePos.put(readablePos, childClass);
     }
 
-    //DEPRECATED
-    static void setupConvertMap(String readablePos){
-        /*Un peu tricky ici :
-        La chaîne alphanumérique est inversée en raison de l'ordre de positionnement
-        initial des pièces dans la boucle. Or dans un jeu d'échec, le a est "en bas".
-        L'idée est de récupérer un "e" de redablePos qui renvoie "e1" par exemple
-
-        On transforme le premier charactère de readablePos en vue de son calcul puis
-        de son insertion en String
-        */
-
-        //Récupération du premier caractère (le seul)
-        char c = readablePos.charAt(0);
-        Character alphaChar = c;
-        //La démarche ici consiste à récupérer 8 quand (alpha - a) vaut zero
-        //Puis il suffit d'en récupérer la valeur absolue
-        Integer rank = Math.abs(alphaChar - 'a' - 8);
-        //On convertit enfin ce char en String
-        String alpha = Character.toString(alphaChar);
-        convertMap.put(alpha, rank);
-        for (String i: convertMap.keySet()) {
-            System.out.println("Key :" + i + " value " + convertMap.get(i));
-        }
+    static void removeAndSetupPieceFromPos(String oldPosition, String readablePos, Piece childClass){
+        piecePos.remove(oldPosition);
+        piecePos.put(readablePos, childClass);
     }
 
-    //DEPRECATED
-    static int convertReadableRankToInt(String letter){
-        return convertMap.get(letter);
-    }
-
-    static ArrayList<String> allowedMoves(String oldReadablePosition, Piece piece){
+    static ArrayList<String> allowedMoves(Piece piece){
         boolean color = piece.getColor();
         boolean firstmove = piece.isFirstMove();
         int rank = piece.getRank();
@@ -66,43 +40,69 @@ public interface PiecePos {
 
     static ArrayList<String> pawnAllowedMoves(int rank, int file, boolean color, boolean firstmove){
         ArrayList<String> allowedMovesList = new ArrayList<String>();
-        int newrank = 0;
+
+        //Position à partir de laquelle on bouge
+        int maxRankRange = 0;
+        int maxFileRange = 1;
         int newfile = file;
+
         if(!color){
             //Vérification du premier mouvement
             if(!firstmove){
-                newrank = rank - 1;
+                maxRankRange = -1;
             } else {
-                newrank = rank - 2;
+                maxRankRange = -2;
             }
             //Vérification de l'existence de pièces adjacentes
 
 
         } else {
             if(!firstmove){
-                newrank = rank + 1;
+                maxRankRange = 1;
             } else {
-                newrank = rank + 2;
+                maxRankRange = 2;
             }
             //Vérification de l'existence de pièces adjacentes
         }
 
-        //Prise
-        //!color
+        //Piece exists
         //gauche rank+1 file-1
         //droite rank+1 file+1
         //color
         //gauche rank-1 file-1
         //droite rank-1 file+1
-        //Square pieceExists = GetSquareFromRankFile.getSquarePos("a3");
-        Square pieceExists = GetSquareFromRankFile.getSquarePos("c3");
-        System.out.println(pieceExists.getHasPiece());
+        ArrayList<String> catchList = new ArrayList<>();
+        if(color){
+            //Prise en diagonale
+            catchList.add(convertIntToAlpha(file+1)+(rank+1));
+            catchList.add(convertIntToAlpha(file-1)+(rank+1));
+        } else {
+            catchList.add(convertIntToAlpha(file-1)+(rank-1));
+            catchList.add(convertIntToAlpha(file+1)+(rank-1));
+        }
+        for (String readablePos:catchList
+             ) {
+            Square square = GetSquareFromRankFile.getSquarePos(readablePos);
+            if(square != null && square.getHasPiece()){
+                Piece piece = square.getPiece();
+                if(color == !piece.getColor()){
+                    allowedMovesList.add(readablePos);
+                }
+            }
+        }
+
+
         //Déplacements verticaux
-        for(int i = 1; i < newrank ; i++){
-            System.out.println(i+rank + " " + newfile);
-            if(inBoard(i+rank, newfile)){
-                String s = convertIntToAlpha(newfile)+(i+rank);
-                allowedMovesList.add(s);
+        int diff = Math.abs(rank - (rank+maxRankRange));
+        int j;
+        for(int i = 1; i <= diff; i++){
+            //Si la couleur est noire, on prend l'opposé de i pour le calcul
+            j = (!color)?i*-1:i;
+            if(inBoard(rank + j, newfile)){
+                String s = convertIntToAlpha(newfile)+(rank + j);
+                if(!GetSquareFromRankFile.getSquarePos(s).getHasPiece()){
+                    allowedMovesList.add(s);
+                }
             }
         }
         return allowedMovesList;
@@ -127,11 +127,13 @@ public interface PiecePos {
     }
 
     static boolean inBoard(int rank, int file){
-        if((rank >= 0 && rank <= 7) && (file >= 0 && file <= 7)){
+        if((rank >= 1 && rank <= 8) && (file >= 1 && file <= 8)){
             return true;
         } else {
             return false;
         }
     }
+
+
 
 }
